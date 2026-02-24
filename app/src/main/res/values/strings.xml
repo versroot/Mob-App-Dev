@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">X9myta</string>
+
+        <string name="new_traffic_report">New Traffic Report</string>
+        <string name="report_type">Report type</string>
+        <string name="description">Description</string>
+        <string name="submit_report">Submit Report</string>
+
+        <string name="severity_format">Severity: %1$d</string>
+
+    <string name="report_type_speed_camera">Speed camera</string>
+    <string name="report_type_heavy_traffic">Heavy traffic</string>
+    <string name="report_type_accident">Accident</string>
+
+
+</resources>
+

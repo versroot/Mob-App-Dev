@@ -1,0 +1,7 @@
+<resources>
+    <string-array name="report_types">
+        <item>@string/report_type_speed_camera</item>
+        <item>@string/report_type_heavy_traffic</item>
+        <item>@string/report_type_accident</item>
+    </string-array>
+</resources>
