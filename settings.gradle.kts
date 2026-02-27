@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "X9myta"
+rootProject.name = "X9"
 include(":app")
  

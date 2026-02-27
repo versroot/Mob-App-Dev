@@ -1,4 +1,4 @@
-package dk.itu.moapd.x9.myta
+package dk.itu.moapd.x9.gicu
 
 import org.junit.Test
 

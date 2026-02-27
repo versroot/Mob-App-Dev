@@ -1,4 +1,4 @@
-package dk.itu.moapd.x9.myta
+package dk.itu.moapd.x9.gicu
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("dk.itu.moapd.x9.myta", appContext.packageName)
+        assertEquals("dk.itu.moapd.x9.gicu", appContext.packageName)
     }
 }

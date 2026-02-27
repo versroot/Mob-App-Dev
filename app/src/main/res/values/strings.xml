@@ -1,17 +1,21 @@
 <resources>
-    <string name="app_name">X9myta</string>
+    <string name="app_name">X9</string>
+    <string name="welcome">Welcome :D</string>
 
-        <string name="new_traffic_report">New Traffic Report</string>
-        <string name="report_type">Report type</string>
-        <string name="description">Description</string>
-        <string name="submit_report">Submit Report</string>
+    <string name="report_title">Report title</string>
+    <string name="report_loc">Location</string>
+    <string name="date_name">Date</string>
+    <string name="type_name">Select type of incident</string>
+    <string name="descText">Description</string>
+    <string name="slider_desc">Priority level</string>
+    <string name="form_button">Submit</string>
 
-        <string name="severity_format">Severity: %1$d</string>
+    <string name="reportbutton">Report Incident</string>
+    <string name="get_report_button">Get latest report</string>
+    <string name="heading">X9</string>
 
-    <string name="report_type_speed_camera">Speed camera</string>
-    <string name="report_type_heavy_traffic">Heavy traffic</string>
-    <string name="report_type_accident">Accident</string>
-
+    <string name="tool_1">Home</string>
+    <string name="tool_2">Get latest</string>
+    <string name="tool_3">Report Incident</string>
 
 </resources>
-
