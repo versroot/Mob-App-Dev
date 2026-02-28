@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -23,31 +25,40 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dk.itu.moapd.x9.myta.ui.theme.X9mytaTheme
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.stringArrayResource
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+
 private const val TAG = "X9"
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             X9mytaTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    TrafficReportForm(
-                        modifier = Modifier.padding(innerPadding) // innerPadding avoid status bar/notch
-                    )
-                }
+                NavigationBar()
             }
         }
     }
@@ -68,11 +79,12 @@ fun TrafficReportForm(modifier: Modifier = Modifier) // 1st - parameter, 2nd - t
 
         modifier = modifier // update with styling
             .fillMaxSize()    // height/width = 100%
-            .padding(16.dp),  // with padding == 16 dp(scalable units)
+            .verticalScroll(rememberScrollState())      //  make form scrollable (when rotated)
+            .padding(24.dp),  // with padding == 16 dp(scalable units)
 
 
 
-        verticalArrangement = Arrangement.spacedBy(16.dp) // like CSS: gap: 16px
+        verticalArrangement = Arrangement.spacedBy(24.dp) // like CSS: gap: 16px
     ) {
 
         Text(
@@ -132,23 +144,115 @@ fun TrafficReportForm(modifier: Modifier = Modifier) // 1st - parameter, 2nd - t
             modifier = Modifier.fillMaxWidth()
         )
 
-
-
         Button(onClick = {
             if (description.isBlank()) { // handle blank
                 Log.w(TAG, "Blocked submit: empty description")
                 return@Button // exit button click
-
             }
-
             Log.d( // log logic
                 TAG,
                 "Report submitted: type=$selectedType, description=$description, severity=${severity.toInt()}"
             )
-        }) {
+            },modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
             Text(stringResource(R.string.submit_report))
         }
 
+    }
+}
+sealed class Destination(
+    val route: String,
+    val label: String,
+    val icon: ImageVector
+    ) {
+        object Home : Destination(
+            route = "home",
+            label = "Home",
+            icon = Icons.Default.Home
+        )
+        object Latest : Destination(
+            route = "latest",
+            label = "Latest",
+            icon = Icons.Default.Email
+        )
+        object Log : Destination(
+            route = "log",
+            label = "Report",
+            icon = Icons.Default.Create
+        )
+}
+
+@Composable
+fun NavigationBarHost(navController: NavHostController, modifier: Modifier) {
+    NavHost(
+        navController = navController,
+        startDestination = Destination.Home.route
+    ) {
+        composable(Destination.Home.route) {
+            Homepage()
+        }
+        composable(Destination.Latest.route) {
+            Latestpage()
+        }
+        composable(Destination.Log.route) {
+            Logpage()
+        }
+    }
+}
+
+@Composable
+fun NavigationBar() {
+    val navController = rememberNavController()     // navigation state
+    val destinations = listOf(Destination.Home, Destination.Latest, Destination.Log)
+
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                val selectedDestination =
+                    navController.currentBackStackEntryAsState().value?.destination?.route
+                destinations.forEach { destination ->
+                    NavigationBarItem(
+                        selected = selectedDestination == destination.route,
+                        onClick = {
+                            navController.navigate(destination.route) {
+                                popUpTo(navController.graph.startDestinationId)
+                                launchSingleTop = true
+                            }
+                        },
+                        icon = {
+                            Icon(imageVector = destination.icon,
+                                contentDescription = destination.label
+                            )
+                        },
+                        label = { Text(destination.label) }
+                    )
+                }
+            }
+        }
+    ) { paddingValues ->
+        NavigationBarHost(
+            navController = navController,
+            modifier = Modifier.padding(paddingValues)
+        )
+    }
+}
+
+@Composable
+fun Homepage() {
+//
+}
+
+@Composable
+fun Latestpage() {
+    //
+}
+
+@Composable
+fun Logpage() {
+    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+        TrafficReportForm(
+            modifier = Modifier.padding(innerPadding) // innerPadding avoid status bar/notch
+        )
     }
 }
 
