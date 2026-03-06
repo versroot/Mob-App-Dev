@@ -133,6 +133,11 @@ fun TrafficReportForm(modifier: Modifier = Modifier, viewModel: ReportViewModel)
         Button(onClick = {
             if (description.isBlank()) { // handle blank
                 Log.w(TAG, "Blocked submit: empty description")
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.report_not_submitted),
+                    Toast.LENGTH_SHORT
+                ).show()
                 return@Button // exit button click
             }
             Log.d( // log logic
@@ -150,7 +155,7 @@ fun TrafficReportForm(modifier: Modifier = Modifier, viewModel: ReportViewModel)
 
             Toast.makeText(
                 context,
-                "Report submitted!",
+                context.getString(R.string.report_submitted),
                 Toast.LENGTH_SHORT
             ).show()
 

@@ -3,7 +3,6 @@ package dk.itu.moapd.x9.myta
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 data class Report(
-    val id: Long = System.currentTimeMillis(),
     val type: String,
     val description: String,
     val severity: Int,

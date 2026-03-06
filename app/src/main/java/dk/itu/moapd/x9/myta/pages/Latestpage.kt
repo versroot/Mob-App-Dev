@@ -14,6 +14,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.res.stringResource
+import dk.itu.moapd.x9.myta.R
 import dk.itu.moapd.x9.myta.ReportViewModel
 
 @Composable
@@ -21,42 +27,45 @@ fun Latestpage(viewModel: ReportViewModel) {
     val latestReport = viewModel.getLatestReport()
     var showReport by rememberSaveable { mutableStateOf(false) }
 
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(onClick = { showReport = true }) {
-            Text("Get latest report")
+            Text(text = stringResource(R.string.get_latest))
         }
+    }
 
-        if (showReport) {
-            AlertDialog(
-                onDismissRequest = { showReport = false },
-                title = {
+    if (showReport) {
+        AlertDialog(
+            onDismissRequest = { showReport = false },
+            title = {
+                Text(
+                    text = "Report summary:",
+                    style = MaterialTheme.typography.titleLarge
+                )
+            },
+            text = {
+                if (latestReport != null) {
                     Text(
-                        text = "Report summary:",
-                        style = MaterialTheme.typography.titleLarge
+                        """
+                    Type: ${latestReport.type}
+                    Description: ${latestReport.description}
+                    Severity: ${latestReport.severity}
+                    """.trimIndent()
                     )
-                },
-                text = {
-                    if (latestReport != null) {
-                        Text(
-                            """
-                            Type: ${latestReport.type}
-                            Description:${latestReport.description}
-                            Severity: ${latestReport.severity}
-                            """.trimIndent()
-                        )
-                    } else {
-                        Text("No incidents yet.")
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { showReport = false }) {
-                        Text("OK")
-                    }
+                } else {
+                    Text(text = stringResource(R.string.no_reports))
                 }
-            )
-        }
+            },
+            confirmButton = {
+                TextButton(onClick = { showReport = false }) {
+                    Text("OK")
+                }
+            }
+        )
     }
 }
