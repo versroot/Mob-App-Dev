@@ -5,8 +5,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,7 +20,6 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -32,7 +29,7 @@ import androidx.navigation.compose.rememberNavController
 import dk.itu.moapd.x9.myta.pages.Homepage
 import dk.itu.moapd.x9.myta.pages.Logpage
 import dk.itu.moapd.x9.myta.pages.Latestpage
-import dk.itu.moapd.x9.myta.ReportViewModel
+
 
 const val TAG = "X9"
 class MainActivity : ComponentActivity() {
