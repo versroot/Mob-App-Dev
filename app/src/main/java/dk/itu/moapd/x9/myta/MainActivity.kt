@@ -3,7 +3,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -48,19 +52,21 @@ class MainActivity : ComponentActivity() {
 
 sealed class Destination(
     val route: String,
-    val label: String,
+    @StringRes val labelRes: Int,
     val icon: ImageVector
 ) {
-    object Home : Destination("home", "Home", Icons.Default.Home)
-    object Latest : Destination("latest", "Latest", Icons.Default.Email)
-    object Log : Destination("log", "Report", Icons.Default.Create)
+    object Home : Destination("home", R.string.nav_home, Icons.Default.Home)
+    object Latest : Destination("latest", R.string.nav_latest, Icons.Default.Email)
+    object Log : Destination("log", R.string.nav_report, Icons.Default.Create)
 }
+
 
 @Composable
 fun NavigationBarHost(navController: NavHostController, modifier: Modifier, viewModel: ReportViewModel) {
     NavHost(
         navController = navController,
-        startDestination = Destination.Home.route
+        startDestination = Destination.Home.route,
+        modifier = modifier
     ) {
         composable(Destination.Home.route) {
             Homepage(viewModel = viewModel)
@@ -73,6 +79,7 @@ fun NavigationBarHost(navController: NavHostController, modifier: Modifier, view
         }
     }
 }
+
 
 @Composable
 fun BottomNavigationBar(viewModel: ReportViewModel) {
@@ -95,10 +102,10 @@ fun BottomNavigationBar(viewModel: ReportViewModel) {
                         },
                         icon = {
                             Icon(imageVector = destination.icon,
-                                contentDescription = destination.label
+                                contentDescription = stringResource(destination.labelRes)
                             )
                         },
-                        label = { Text(destination.label) }
+                        label = { Text(stringResource(destination.labelRes)) }
                     )
                 }
             }

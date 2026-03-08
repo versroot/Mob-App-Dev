@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">X9myta</string>
     <string name="heading">X9</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_latest">Latest</string>
+    <string name="nav_report">Report</string>
 
     <string name="new_traffic_report">New Traffic Report</string>
     <string name="report_type">Report type</string>
@@ -16,6 +19,11 @@
     <string name="report_not_submitted">Please fill in the form</string>
     <string name="get_latest">Get latest report</string>
     <string name="no_reports">No incidents yet.</string>
+    <string name="report_severity">⚠️ %1$d</string>
+    <string name="report_summary">Report summary</string>
+    <string name="dialog_ok">OK</string>
+    <string name="latest_report_details">Type: %1$s\nDescription: %2$s\nSeverity: %3$d</string>
+
 
 
 </resources>

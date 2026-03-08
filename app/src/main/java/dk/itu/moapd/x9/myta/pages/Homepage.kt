@@ -59,15 +59,19 @@ fun Homepage(viewModel: ReportViewModel) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportItem(report: Report, modifier: Modifier = Modifier) {
-    Card(modifier = modifier.padding(8.dp).fillMaxSize()) {
+    Card(modifier = modifier.padding(8.dp).fillMaxWidth()) {
         Row(modifier = Modifier
                 .fillMaxWidth().padding(vertical = 20.dp, horizontal = 10.dp)
         ) {
             Column(
                 modifier = Modifier.weight(1f).padding(horizontal = 10.dp)
             ) {
-                Text(text = "⚠️ ${report.severity}" , style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold)
+                Text(
+                    text = stringResource(R.string.report_severity, report.severity),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+
                 Text(text = formatTime24(report.timestamp), style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(top = 8.dp))
             }

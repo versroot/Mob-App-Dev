@@ -44,18 +44,19 @@ fun Latestpage(viewModel: ReportViewModel) {
             onDismissRequest = { showReport = false },
             title = {
                 Text(
-                    text = "Report summary:",
+                    text = stringResource(R.string.report_summary),
                     style = MaterialTheme.typography.titleLarge
                 )
             },
             text = {
                 if (latestReport != null) {
                     Text(
-                        """
-                    Type: ${latestReport.type}
-                    Description: ${latestReport.description}
-                    Severity: ${latestReport.severity}
-                    """.trimIndent()
+                        text = stringResource(
+                            R.string.latest_report_details,
+                            latestReport.type,
+                            latestReport.description,
+                            latestReport.severity
+                        )
                     )
                 } else {
                     Text(text = stringResource(R.string.no_reports))
@@ -63,9 +64,10 @@ fun Latestpage(viewModel: ReportViewModel) {
             },
             confirmButton = {
                 TextButton(onClick = { showReport = false }) {
-                    Text("OK")
+                    Text(stringResource(R.string.dialog_ok))
                 }
             }
+
         )
     }
 }
