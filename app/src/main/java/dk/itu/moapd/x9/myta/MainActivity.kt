@@ -4,7 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,14 +59,19 @@ sealed class Destination(
 
 
 @Composable
-fun NavigationBarHost(navController: NavHostController, modifier: Modifier, viewModel: ReportViewModel) {
+fun NavigationBarHost(
+    navController: NavHostController,
+    modifier: Modifier,
+    viewModel: ReportViewModel,
+    innerPadding: PaddingValues
+) {
     NavHost(
         navController = navController,
         startDestination = Destination.Home.route,
         modifier = modifier
     ) {
         composable(Destination.Home.route) {
-            Homepage(viewModel = viewModel)
+            Homepage(viewModel = viewModel, innerPadding = innerPadding)
         }
         composable(Destination.Latest.route) {
             Latestpage(viewModel = viewModel)
@@ -111,7 +116,8 @@ fun BottomNavigationBar(viewModel: ReportViewModel) {
         NavigationBarHost(
             navController = navController,
             modifier = Modifier,
-            viewModel = viewModel
+            viewModel = viewModel,
+            innerPadding = paddingValues
         )
     }
 }
