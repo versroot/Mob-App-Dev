@@ -110,7 +110,7 @@ fun BottomNavigationBar(viewModel: ReportViewModel) {
     ) { paddingValues ->
         NavigationBarHost(
             navController = navController,
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier,
             viewModel = viewModel
         )
     }

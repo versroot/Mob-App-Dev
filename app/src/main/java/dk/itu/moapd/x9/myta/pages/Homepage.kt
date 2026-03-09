@@ -1,13 +1,14 @@
 package dk.itu.moapd.x9.myta.pages
 
 import androidx.compose.foundation.layout.Arrangement
+import android.content.res.Configuration
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Modifier
@@ -20,7 +21,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import dk.itu.moapd.x9.myta.R
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -31,35 +34,32 @@ import dk.itu.moapd.x9.myta.Report
 fun Homepage(viewModel: ReportViewModel) {
     val reports = viewModel.reports
 
+    val configuration = LocalConfiguration.current.orientation
+    val margin = if (configuration == Configuration.ORIENTATION_LANDSCAPE) { 4.dp
+    } else { 16.dp }
+    val top = if (configuration == Configuration.ORIENTATION_LANDSCAPE) { 4.dp
+    } else { 44.dp }
+
     Column( modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp)
-            .padding( vertical = 20.dp)
-            .padding(bottom = 10.dp),
+        .fillMaxSize()
+        .padding(start = 20.dp, end = 20.dp, top = top),
             horizontalAlignment = Alignment.CenterHorizontally
     )
         {
         Text(text = stringResource(R.string.heading), style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.ExtraBold)
 
-        Spacer(modifier = Modifier.padding(top = 16.dp))
+        Spacer(modifier = Modifier.padding(top =  margin))
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize().weight(1f),
-                contentPadding = PaddingValues(
-                    start = 24.dp,
-                    top = 24.dp,
-                    end = 24.dp,
-                    bottom = 20.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(reports) { report ->
                     ReportItem(report)
                 }
             }
-
-        }
+    }
 }
 
 
