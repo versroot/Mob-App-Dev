@@ -1,13 +1,18 @@
 package dk.itu.moapd.x9.myta
 import android.content.Intent
 import android.os.Bundle
+import androidx.compose.ui.graphics.Color
 import com.google.firebase.auth.FirebaseAuth
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -60,8 +65,7 @@ class MainActivity : ComponentActivity() {
 
     private fun startLoginActivity() {
         Intent(this, LoginActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }.let(::startActivity)
     }
 
@@ -74,7 +78,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val viewModel: ReportViewModel = viewModel() // create viewmodel
             X9mytaTheme {
-                BottomNavigationBar(viewModel = viewModel, //pass viewmodel to navigation bar
+                BottomNavigationBar(viewModel = viewModel, auth = auth, //pass viewmodel to navigation bar
                     onLogout = {
                         auth.signOut()
                         startLoginActivity() }
@@ -123,7 +127,7 @@ fun NavigationBarHost(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomNavigationBar(viewModel: ReportViewModel, onLogout: () -> Unit ) {
+fun BottomNavigationBar(viewModel: ReportViewModel, auth: FirebaseAuth, onLogout: () -> Unit ) {
     val navController = rememberNavController()     // navigation state
     val destinations = listOf(Destination.Home, Destination.Latest, Destination.Log)
     var menuExpanded by remember { mutableStateOf(false) }
@@ -132,17 +136,14 @@ fun BottomNavigationBar(viewModel: ReportViewModel, onLogout: () -> Unit ) {
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,),
-                title = {
-                    Text("Small Top App Bar") },
+                    containerColor = Color.Transparent),
+                title = {},
                 navigationIcon = {
                     Box {
                         IconButton(onClick = {menuExpanded = true}) {
                             Icon(
                                 imageVector = Icons.Filled.Menu,
-                                "Open Menu"
-                            )
+                                "Open Menu")
                         }
                         DropdownMenu( expanded = menuExpanded, onDismissRequest = {menuExpanded = false}) {
                             DropdownMenuItem(

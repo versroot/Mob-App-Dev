@@ -24,7 +24,6 @@ class LoginActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         createSignInIntent()
     }
     private fun createSignInIntent() { //uses FirebaseUI to create a login activity
@@ -51,14 +50,19 @@ class LoginActivity : ComponentActivity() {
         when (result.resultCode) {
             RESULT_OK -> {
                 showSnackBar("User logged in the app.")
-                finish()
+                startMainActivity()
             }
             else -> {
                 showSnackBar("Authentication failed.")
             }
         }
     }
-
+    private fun startMainActivity() {
+        Intent(this, MainActivity::class.java).apply {
+            startActivity(this)
+            finish()
+        }
+    }
     private fun showSnackBar(message: String) {
         Snackbar.make(
             window.decorView.rootView, message, Snackbar.LENGTH_SHORT
