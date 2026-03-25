@@ -32,24 +32,24 @@ import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import android.widget.Toast
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import dk.itu.moapd.x9.myta.R
 import dk.itu.moapd.x9.myta.ReportViewModel
 import dk.itu.moapd.x9.myta.TAG
 
 @Composable
-fun Logpage(viewModel: ReportViewModel) {
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        TrafficReportForm(
-            viewModel = viewModel,
-            modifier = Modifier.padding(innerPadding)
-        )
-    }
+fun Logpage(viewModel: ReportViewModel, innerPadding: PaddingValues) {
+    TrafficReportForm(
+        viewModel = viewModel,
+        innerPadding = innerPadding
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TrafficReportForm(modifier: Modifier = Modifier, viewModel: ReportViewModel) // 1st - parameter, 2nd - type, 3rd - value
+fun TrafficReportForm(modifier: Modifier = Modifier, innerPadding: PaddingValues, viewModel: ReportViewModel) // 1st - parameter, 2nd - type, 3rd - value
 {
     val context = LocalContext.current
 
@@ -65,11 +65,13 @@ fun TrafficReportForm(modifier: Modifier = Modifier, viewModel: ReportViewModel)
         modifier = modifier // update with styling
             .fillMaxSize()    // height/width = 100%
             .verticalScroll(rememberScrollState())      //  make form scrollable (when rotated)
-            .padding(24.dp),  // with padding == 16 dp(scalable units)
-
-
-
-        verticalArrangement = Arrangement.spacedBy(24.dp) // like CSS: gap: 16px
+            .padding(
+                start = dimensionResource(R.dimen.generic_padding),
+                end = dimensionResource(R.dimen.generic_padding),
+                top = innerPadding.calculateTopPadding(),
+                bottom = innerPadding.calculateBottomPadding() + dimensionResource(R.dimen.generic_padding)
+            ),
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.generic_padding)) // like CSS: gap: 16px
     ) {
 
         Text(

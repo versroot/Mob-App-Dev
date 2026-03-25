@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import dk.itu.moapd.x9.myta.R
 import dk.itu.moapd.x9.myta.ReportViewModel
@@ -29,7 +30,7 @@ fun Latestpage(viewModel: ReportViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(dimensionResource(R.dimen.generic_padding)),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

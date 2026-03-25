@@ -23,8 +23,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.FontWeight
 import dk.itu.moapd.x9.myta.R
 import java.text.SimpleDateFormat
@@ -34,17 +37,17 @@ import dk.itu.moapd.x9.myta.Report
 
 @Composable
 fun Homepage(viewModel: ReportViewModel, innerPadding: PaddingValues) {
-    val reports = viewModel.reports
+    val reports by viewModel.reports.collectAsState()
 
     val configuration = LocalConfiguration.current.orientation
-    val margin = if (configuration == Configuration.ORIENTATION_LANDSCAPE) { 4.dp
-    } else { 16.dp }
-    val top = if (configuration == Configuration.ORIENTATION_LANDSCAPE) { 4.dp
-    } else { 44.dp }
+    val margin = if (configuration == Configuration.ORIENTATION_LANDSCAPE) { dimensionResource(R.dimen.spacing_small)
+    } else { dimensionResource(R.dimen.spacing_large) }
+    val top = if (configuration == Configuration.ORIENTATION_LANDSCAPE) { dimensionResource(R.dimen.spacing_small)
+    } else { dimensionResource(R.dimen.spacing_xlarge) }
 
     Column( modifier = Modifier
         .fillMaxSize()
-        .padding(start = 20.dp, end = 20.dp, top = top),
+        .padding(start = dimensionResource(R.dimen.screen_padding_horizontal), end = dimensionResource(R.dimen.screen_padding_horizontal), top = top),
             horizontalAlignment = Alignment.CenterHorizontally
     )
         {
@@ -60,9 +63,9 @@ fun Homepage(viewModel: ReportViewModel, innerPadding: PaddingValues) {
                         .fillMaxSize()
                         .weight(1f),
                     contentPadding = PaddingValues(
-                        bottom = innerPadding.calculateBottomPadding() + 4.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        bottom = innerPadding.calculateBottomPadding() + dimensionResource(R.dimen.spacing_small)),
+                    verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.card_padding_horizontal)),
+                    horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.card_padding_horizontal))
                 ) {
                     items(reports) { report ->
                         ReportItem(report = report)
@@ -74,8 +77,8 @@ fun Homepage(viewModel: ReportViewModel, innerPadding: PaddingValues) {
                         .fillMaxSize()
                         .weight(1f),
                     contentPadding = PaddingValues(
-                        bottom = innerPadding.calculateBottomPadding() + 4.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                        bottom = innerPadding.calculateBottomPadding() + dimensionResource(R.dimen.spacing_small)),
+                    verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.card_padding_horizontal))
                 ) {
                     items(reports) { report ->
                         ReportItem(report = report)
@@ -92,13 +95,13 @@ fun ReportItem(report: Report, modifier: Modifier = Modifier) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
+            .padding(vertical = dimensionResource(R.dimen.spacing_small))
     ) {
         Row(modifier = Modifier
-                .fillMaxWidth().padding(vertical = 20.dp, horizontal = 10.dp)
+                .fillMaxWidth().padding(vertical = dimensionResource(R.dimen.card_padding_vertical), horizontal = dimensionResource(R.dimen.card_padding_horizontal))
         ) {
             Column(
-                modifier = Modifier.weight(1f).padding(horizontal = 10.dp)
+                modifier = Modifier.weight(1f).padding(horizontal = dimensionResource(R.dimen.card_padding_horizontal))
             ) {
                 Text(
                     text = stringResource(R.string.report_severity, report.severity),
@@ -107,7 +110,7 @@ fun ReportItem(report: Report, modifier: Modifier = Modifier) {
                 )
 
                 Text(text = formatTime24(report.timestamp), style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(top = 8.dp))
+                    modifier = Modifier.padding(top = dimensionResource(R.dimen.spacing_medium)))
             }
             Column(
                 modifier = Modifier.weight(2f)
@@ -115,7 +118,7 @@ fun ReportItem(report: Report, modifier: Modifier = Modifier) {
                 Text(text = report.type, style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold)
                 Text(text = report.description, style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(top = 8.dp))
+                    modifier = Modifier.padding(top = dimensionResource(R.dimen.spacing_medium)))
             }
         }
 
