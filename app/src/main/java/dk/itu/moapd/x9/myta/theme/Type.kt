@@ -1,4 +1,4 @@
-package dk.itu.moapd.x9.myta.ui.theme
+package dk.itu.moapd.x9.myta.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

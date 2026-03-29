@@ -1,21 +1,14 @@
-package dk.itu.moapd.x9.myta
+package dk.itu.moapd.x9.myta.auth
 
-import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.content.Intent
+import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.activity.R
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
-import com.google.android.material.snackbar.Snackbar
+import dk.itu.moapd.x9.myta.ui.MainActivity
 
 class LoginActivity : ComponentActivity() {
     private val signInLauncher = //This object launches a new activity and receives back some result data.
@@ -37,6 +30,7 @@ class LoginActivity : ComponentActivity() {
             .createSignInIntentBuilder()
             .setAvailableProviders(providers)
             .setCredentialManagerEnabled(false)
+            .setTheme(dk.itu.moapd.x9.myta.R.style.Theme_X9myta_FirebaseAuth)
             .setTosAndPrivacyPolicyUrls(
                 "https://firebase.google.com/terms/",
                 "https://firebase.google.com/policies"
@@ -48,7 +42,8 @@ class LoginActivity : ComponentActivity() {
 
 
     private fun onSignInResult(
-        result: FirebaseAuthUIAuthenticationResult) {
+        result: FirebaseAuthUIAuthenticationResult
+    ) {
         val response = result.idpResponse
         when (result.resultCode) {
             RESULT_OK -> {
@@ -57,14 +52,15 @@ class LoginActivity : ComponentActivity() {
             else -> {// Sign-in failed or cancelled
                 if (response == null) {
                     // User pressed back — just cancelled
-                    android.util.Log.w("LoginActivity", "User canceled sign-in")
+                    Log.w("LoginActivity", "User canceled sign-in")
+                    // exit the app
+                    finish()
                 } else {
                     // Actual error
-                    android.util.Log.e(
-                        "LoginActivity",
+                    Log.e("LoginActivity",
                         "Sign-in error code: ${response.error?.errorCode}",
-                        response.error
-                    )
+                        response.error)
+                    finish()
                 }
             }
         }

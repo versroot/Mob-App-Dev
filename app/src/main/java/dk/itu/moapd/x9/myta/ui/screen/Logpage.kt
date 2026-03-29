@@ -1,4 +1,4 @@
-package dk.itu.moapd.x9.myta.pages
+package dk.itu.moapd.x9.myta.ui.screen
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
@@ -17,7 +17,6 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,14 +29,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import dk.itu.moapd.x9.myta.R
-import dk.itu.moapd.x9.myta.ReportViewModel
-import dk.itu.moapd.x9.myta.TAG
+import dk.itu.moapd.x9.myta.ui.TAG
+import dk.itu.moapd.x9.myta.viewmodel.ReportViewModel
 
 @Composable
 fun Logpage(viewModel: ReportViewModel, innerPadding: PaddingValues) {
