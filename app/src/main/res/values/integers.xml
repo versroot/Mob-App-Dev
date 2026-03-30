@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="ncards_horizontal">2</integer>
+    <integer name="ncards_vertical">1</integer>
+</resources>

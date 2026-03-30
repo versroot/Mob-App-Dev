@@ -22,14 +22,6 @@ data class Report(
     val timestamp: Long = 0L
 )
 
-data class ReportUi(
-    val key: String,
-    val type: String,
-    val description: String,
-    val severity: Int,
-    val timestamp: Long?
-)
-
 // Viewmodel: persistent storage of data even if activities are restarted / accessible across pages
 class ReportViewModel(
     private val repository: ReportRepository = ReportRepository()

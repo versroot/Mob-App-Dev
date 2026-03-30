@@ -23,9 +23,12 @@
     <string name="get_latest">Get latest report</string>
     <string name="no_reports">No incidents yet.</string>
     <string name="report_severity">⚠️ %1$d</string>
+
     <string name="report_summary">Report summary</string>
     <string name="dialog_ok">OK</string>
     <string name="latest_report_details">Type: %1$s\nDescription: %2$s\nSeverity: %3$d</string>
+
+    <string name="item_deleted">Report has been deleted</string>
 
 
 </resources>
