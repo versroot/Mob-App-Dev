@@ -153,6 +153,13 @@ fun ReportItem(
                     fontWeight = FontWeight.Bold)
                 Text(text = report.description, style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(top = dimensionResource(R.dimen.spacing_medium)))
+                Text(
+                    text = if (report.latitude != null && report.longitude != null) {
+                        "Loc: %.2f, %.2f".format(report.latitude, report.longitude)
+                    } else {
+                        stringResource(R.string.loc_available)
+                    }
+                )
             }
         }
     }

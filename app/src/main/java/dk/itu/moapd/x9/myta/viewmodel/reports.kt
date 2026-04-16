@@ -1,9 +1,7 @@
 package dk.itu.moapd.x9.myta.viewmodel
 
 import android.util.Log
-import androidx.compose.runtime.key
 import androidx.lifecycle.ViewModel
-import androidx.room.util.copy
 import kotlinx.coroutines.flow.MutableStateFlow
 import dk.itu.moapd.x9.myta.repository.ReportRepository
 import com.google.firebase.database.DataSnapshot
@@ -17,15 +15,34 @@ import kotlin.String
 data class Report(
     val key: String = "",
     val type: String = "",
+    val latitude: Double? = null,
+    val longitude: Double? = null,
     val description: String = "",
     val severity: Int = 1,
     val timestamp: Long = 0L
+)
+
+data class UiLocation(
+    val latitude: Double? = null,
+    val longitude: Double? = null
 )
 
 // Viewmodel: persistent storage of data even if activities are restarted / accessible across pages
 class ReportViewModel(
     private val repository: ReportRepository = ReportRepository()
 ) : ViewModel() {
+    private val _currentLocation = MutableStateFlow(UiLocation())
+    val currentLocation: StateFlow<UiLocation> = _currentLocation.asStateFlow()
+
+    fun updateCurrentLocation(latitude: Double?, longitude: Double?) {
+        _currentLocation.value = UiLocation(
+            latitude = latitude,
+            longitude = longitude
+        )
+    }
+    fun clearCurrentLocation() {
+        _currentLocation.value = UiLocation()
+    }
     private val _reports = MutableStateFlow<List<Report>>(emptyList())
     val reports: StateFlow<List<Report>> = _reports.asStateFlow()
     // The listener for Firebase Realtime Database
@@ -71,13 +88,15 @@ class ReportViewModel(
         }
     }
 
-    fun addReport(type: String, description: String, severity: Int) {
+    fun addReport(type: String, description: String, severity: Int, latitude: Double?, longitude: Double?) {
         val userId = repository.currentUserId() ?: return
         repository.insertReport(
             userId = userId,
             type = type,
             description = description,
-            severity = severity
+            severity = severity,
+            latitude = latitude,
+            longitude = longitude
         )
     }
     fun getLatestReport(): Report? = _reports.value.maxByOrNull { it.timestamp }

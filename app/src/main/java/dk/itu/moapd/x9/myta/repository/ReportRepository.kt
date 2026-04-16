@@ -1,6 +1,5 @@
 package dk.itu.moapd.x9.myta.repository
 
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -34,21 +33,29 @@ class ReportRepository(
         .orderByChild(CHILD_TIMESTAMP)
 
     //Add/update/delete report to the database.
-    fun insertReport(userId: String, type: String, description: String, severity: Int, now: Long = System.currentTimeMillis()) {
+    fun insertReport(
+        userId: String,
+        type: String,
+        description: String,
+        severity: Int,
+        latitude: Double?,
+        longitude: Double?,
+        now: Long = System.currentTimeMillis()
+    ) {
         val key = root
             .child(PATH_REPORTS)
             .child(userId)
             .push()
             .key ?: return
-        val report = Report(type = type, description = description, severity = severity, timestamp = now)
+        val report = Report(type = type, description = description, severity = severity, latitude = latitude, longitude = longitude, timestamp = now)
         root
             .child(PATH_REPORTS)
             .child(userId)
             .child(key)
             .setValue(report)
     }
-    fun updateReport(userId: String, key: String, type: String, description: String, severity: Int, now: Long = System.currentTimeMillis()) {
-        val report = Report(type = type, description = description, severity = severity, timestamp = now)
+    fun updateReport(userId: String, key: String, type: String, description: String, severity: Int, latitude: Double, longitude: Double, now: Long = System.currentTimeMillis()) {
+        val report = Report(type = type, description = description, severity = severity, latitude = latitude, longitude = longitude, timestamp = now)
         root
             .child(PATH_REPORTS)
             .child(userId)

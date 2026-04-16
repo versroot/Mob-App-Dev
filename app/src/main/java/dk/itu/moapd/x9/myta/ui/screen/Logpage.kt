@@ -33,6 +33,7 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dk.itu.moapd.x9.myta.R
 import dk.itu.moapd.x9.myta.ui.TAG
 import dk.itu.moapd.x9.myta.viewmodel.ReportViewModel
@@ -54,6 +55,7 @@ fun TrafficReportForm(modifier: Modifier = Modifier, innerPadding: PaddingValues
     val reportTypes = stringArrayResource(R.array.report_types).toList()
     var selectedType by rememberSaveable { mutableStateOf(reportTypes[0]) } // store what is selected; default - first
     var dropdownOpened by rememberSaveable { mutableStateOf(false) } // store if opened; default - not
+    val currentLocation by viewModel.currentLocation.collectAsStateWithLifecycle()
     var description by rememberSaveable { mutableStateOf("") } // store what is in description; default - empty
     var severity by rememberSaveable { mutableFloatStateOf(3f) } // store severity; default middle (Slider uses Float) [web:111]
 
@@ -112,6 +114,18 @@ fun TrafficReportForm(modifier: Modifier = Modifier, innerPadding: PaddingValues
                 }
             }
         }
+
+        Text(
+            text = if (currentLocation.latitude != null && currentLocation.longitude != null) {
+                "Location: %.6f, %.6f".format(
+                    currentLocation.latitude,
+                    currentLocation.longitude
+                )
+            } else {
+                "Location: not available"
+            }
+        )
+
         OutlinedTextField(
             value = description, // show what is in description
             onValueChange = { newText -> description = newText }, // save what user typed into description
@@ -146,7 +160,9 @@ fun TrafficReportForm(modifier: Modifier = Modifier, innerPadding: PaddingValues
             viewModel.addReport(    //save to viewmodel
                 type = selectedType,
                 description = description,
-                severity = severity.toInt()
+                severity = severity.toInt(),
+                latitude = currentLocation.latitude,
+                longitude = currentLocation.longitude
             )
             description = ""    // Clear form
             severity = 3f

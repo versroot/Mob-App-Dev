@@ -2,18 +2,21 @@
     <string name="app_name">X9myta</string>
     <string name="heading">X9</string>
     <string name="nav_home">Home</string>
-    <string name="nav_latest">Latest</string>
+    <string name="nav_map">Location</string>
     <string name="nav_report">Report</string>
 
     <string name="menu">Open menu</string>
     <string name="menu_item_2">Logout</string>
     <string name="menu_item_1">Profile</string>
+    <string name="menu_item_3">Permissions</string>
 
     <string name="new_traffic_report">New Traffic Report</string>
     <string name="report_type">Report type</string>
     <string name="description">Description</string>
     <string name="submit_report">Submit Report</string>
     <string name="severity_format">Severity: %1$d</string>
+    <string name="location_box">Save Location</string>
+    <string name="loc_available">Location not available</string>
 
     <string name="report_type_speed_camera">Speed camera</string>
     <string name="report_type_heavy_traffic">Heavy traffic</string>
@@ -26,7 +29,7 @@
 
     <string name="report_summary">Report summary</string>
     <string name="dialog_ok">OK</string>
-    <string name="latest_report_details">Type: %1$s\nDescription: %2$s\nSeverity: %3$d</string>
+    <string name="dialogue_loc">Location Settings</string>
 
     <string name="item_deleted">Report has been deleted</string>
 

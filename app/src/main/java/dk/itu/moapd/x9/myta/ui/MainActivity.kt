@@ -1,6 +1,16 @@
 package dk.itu.moapd.x9.myta.ui
 import android.content.Intent
 import android.os.Bundle
+import android.Manifest
+import android.content.ComponentName
+import android.content.Context
+import android.content.ServiceConnection
+import android.os.IBinder
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import dk.itu.moapd.x9.myta.service.LocationService
 import androidx.compose.ui.graphics.Color
 import com.google.firebase.auth.FirebaseAuth
 import androidx.activity.ComponentActivity
@@ -46,24 +56,34 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.AddTask
+import androidx.compose.material.icons.filled.LocationSearching
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dk.itu.moapd.x9.myta.R
 import dk.itu.moapd.x9.myta.auth.LoginActivity
 import dk.itu.moapd.x9.myta.ui.screen.Homepage
-import dk.itu.moapd.x9.myta.ui.screen.Latestpage
+import dk.itu.moapd.x9.myta.ui.screen.Mappage
 import dk.itu.moapd.x9.myta.ui.screen.Logpage
 import dk.itu.moapd.x9.myta.viewmodel.ReportViewModel
+import dk.itu.moapd.x9.myta.ui.screen.requestOrStartTracking
 
 const val TAG = "X9"
 
@@ -109,8 +129,8 @@ sealed class Destination(
     val icon: ImageVector
 ) {
     object Home : Destination("home", R.string.nav_home, Icons.Default.Home)
-    object Latest : Destination("latest", R.string.nav_latest, Icons.Default.Email)
-    object Log : Destination("log", R.string.nav_report, Icons.Default.Create)
+    object Map : Destination("map", R.string.nav_map, Icons.Default.LocationSearching)
+    object Log : Destination("log", R.string.nav_report, Icons.Default.AddTask)
 }
 
 
@@ -132,8 +152,8 @@ fun NavigationBarHost(
         composable(Destination.Log.route) {
             Logpage(viewModel = viewModel, innerPadding = innerPadding)
         }
-        composable(Destination.Latest.route) {
-            Latestpage(viewModel = viewModel)
+        composable(Destination.Map.route) {
+            Mappage(viewModel = viewModel)
         }
     }
 }
@@ -141,39 +161,109 @@ fun NavigationBarHost(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomNavigationBar(viewModel: ReportViewModel, auth: FirebaseAuth, onLogout: () -> Unit ) {
+fun BottomNavigationBar(viewModel: ReportViewModel, auth: FirebaseAuth, onLogout: () -> Unit) {
     val navController = rememberNavController()     // navigation state
-    val destinations = listOf(Destination.Home, Destination.Latest, Destination.Log)
+    val destinations = listOf(Destination.Home, Destination.Map, Destination.Log)
     var menuExpanded by remember { mutableStateOf(false) }
     var showProfileDialog by rememberSaveable { mutableStateOf(false) }
+    var showLocationDialog by rememberSaveable { mutableStateOf(false) }
     val reports by viewModel.reports.collectAsStateWithLifecycle()
+
+    val context = LocalContext.current
+
+    var locationService by remember { mutableStateOf<LocationService?>(null) }
+    var isBound by remember { mutableStateOf(false) }
+
+    val connection = remember {
+        object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                val binder = service as? LocationService.LocalBinder
+                locationService = binder?.getService()
+                isBound = locationService != null
+            }
+
+            override fun onServiceDisconnected(name: ComponentName?) {
+                locationService = null
+                isBound = false
+            }
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            locationService?.startTracking()
+        }
+    }
+
+    DisposableEffect(context, connection) {
+        val intent = Intent(context, LocationService::class.java)
+        val bound = context.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+
+        onDispose {
+            if (bound) {
+                context.unbindService(connection)
+            }
+        }
+    }
+
+    val location by locationService
+        ?.locationUpdates
+        ?.collectAsStateWithLifecycle(initialValue = null)
+        ?: remember { mutableStateOf(null) }
+
+    val isTracking by locationService
+        ?.isTracking
+        ?.collectAsStateWithLifecycle(initialValue = false)
+        ?: remember { mutableStateOf(false) }
+
+    LaunchedEffect(location) {
+        location?.let {
+            viewModel.updateCurrentLocation(
+                latitude = it.latitude,
+                longitude = it.longitude
+            )
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent),
+                    containerColor = Color.Transparent
+                ),
                 title = {},
                 navigationIcon = {
                     Box {
-                        IconButton(onClick = {menuExpanded = true}) {
+                        IconButton(onClick = { menuExpanded = true }) {
                             Icon(
                                 imageVector = Icons.Filled.Menu,
-                                stringResource(R.string.menu))
+                                stringResource(R.string.menu)
+                            )
                         }
-                        DropdownMenu( expanded = menuExpanded, onDismissRequest = {menuExpanded = false}) {
+                        DropdownMenu(
+                            expanded = menuExpanded,
+                            onDismissRequest = { menuExpanded = false }) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.menu_item_1)) },
                                 onClick = {
                                     menuExpanded = false
-                                    showProfileDialog = true // Show the popup!
+                                    showProfileDialog = true
                                 }
                             )
                             DropdownMenuItem(
-                                text = {Text(stringResource(R.string.menu_item_2))},
+                                text = { Text(stringResource(R.string.menu_item_2)) },
                                 onClick = {
                                     menuExpanded = false
                                     onLogout()
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Location") },
+                                onClick = {
+                                    menuExpanded = false
+                                    showLocationDialog = true
                                 }
                             )
                         }
@@ -195,7 +285,8 @@ fun BottomNavigationBar(viewModel: ReportViewModel, auth: FirebaseAuth, onLogout
                             }
                         },
                         icon = {
-                            Icon(imageVector = destination.icon,
+                            Icon(
+                                imageVector = destination.icon,
                                 contentDescription = stringResource(destination.labelRes)
                             )
                         },
@@ -220,7 +311,8 @@ fun BottomNavigationBar(viewModel: ReportViewModel, auth: FirebaseAuth, onLogout
             onDismissRequest = {/**/ },
             confirmButton = {
                 TextButton(onClick = { showProfileDialog = false }) {
-                    Text("OK") }
+                    Text("OK")
+                }
             },
             title = { Text("Profile") },
             text = {
@@ -243,6 +335,60 @@ fun BottomNavigationBar(viewModel: ReportViewModel, auth: FirebaseAuth, onLogout
                     }
                     Text(text = userName, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     Text(text = "Total Reports: $reportCount", fontSize = 16.sp)
+                }
+            }
+        )
+    }
+    if (showLocationDialog) {
+        AlertDialog(
+            onDismissRequest = { showLocationDialog = false },
+            title = {
+                Text(stringResource(R.string.dialogue_loc))
+            },
+            text = {
+                Column {
+                    Text("Service bound: $isBound")
+                    Text(if (location?.latitude != null) {
+                            "Latitude: %.6f".format(location?.latitude)
+                        } else
+                        {"Latitude: Not available" }
+                    )
+                    Text(if (location?.longitude != null) {
+                            "Longitude: %.6f".format(location?.longitude)
+                        } else
+                        {"Longitude: Not available"}
+                    )
+                    Text("Tracking: ${if (isTracking) "ON" else "OFF"}")
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val service = locationService ?: return@TextButton
+
+                        if (isTracking) {
+                            service.stopTracking()
+                            viewModel.clearCurrentLocation()
+                        } else {
+                            requestOrStartTracking(
+                                context = context,
+                                onHasPermission = {
+                                    service.startTracking()
+                                },
+                                onRequestPermission = {
+                                    permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                                }
+                            )
+                        }
+                    },
+                    enabled = isBound
+                ) {
+                    Text(if (isTracking) "Stop tracking" else "Start tracking")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLocationDialog = false }) {
+                    Text(text = stringResource(R.string.dialog_ok))
                 }
             }
         )
