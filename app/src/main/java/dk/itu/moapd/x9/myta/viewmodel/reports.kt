@@ -1,5 +1,6 @@
 package dk.itu.moapd.x9.myta.viewmodel
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,12 +15,14 @@ import kotlin.String
 
 data class Report(
     val key: String = "",
+    val uid: String = "",
     val type: String = "",
     val latitude: Double? = null,
     val longitude: Double? = null,
     val description: String = "",
     val severity: Int = 1,
-    val timestamp: Long = 0L
+    val timestamp: Long = 0L,
+    val imageUrl: String? = null
 )
 
 data class UiLocation(
@@ -27,7 +30,6 @@ data class UiLocation(
     val longitude: Double? = null
 )
 
-// Viewmodel: persistent storage of data even if activities are restarted / accessible across pages
 class ReportViewModel(
     private val repository: ReportRepository = ReportRepository()
 ) : ViewModel() {
@@ -40,32 +42,32 @@ class ReportViewModel(
             longitude = longitude
         )
     }
+    
     fun clearCurrentLocation() {
         _currentLocation.value = UiLocation()
     }
+    
     private val _reports = MutableStateFlow<List<Report>>(emptyList())
     val reports: StateFlow<List<Report>> = _reports.asStateFlow()
-    // The listener for Firebase Realtime Database
+    
     private var listener: ValueEventListener? = null
 
     init {
-        // Start observing as soon as we have a user.
         observeReports()
     }
 
-    private fun observeReports() {
-        val userId = repository.currentUserId() ?: return
-        val query = repository.reportsQuery(userId)
+    fun observeReports() {
+
+        stopObserving()
+
+        val query = repository.reportsQuery()
 
         val valueListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                // Map the Firebase snapshot back into a Kotlin List<Report>
                 val items = snapshot.children.mapNotNull { child ->
                     val childKey = child.key ?: return@mapNotNull null
                     val report = child.getValue(Report::class.java) ?: return@mapNotNull null
-                    report.copy(
-                        key = childKey
-                    )
+                    report.copy(key = childKey)
                 }.sortedByDescending { it.timestamp }
                 _reports.update { items }
             }
@@ -74,35 +76,52 @@ class ReportViewModel(
                 Log.e("ReportViewModel", "Database error: ${error.message}")
             }
         }
-        // Update the listener and add it to the query.
+        
         listener = valueListener
         query.addValueEventListener(valueListener)
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        val userId = repository.currentUserId()
+    private fun stopObserving() {
         val l = listener
-        if (userId != null && l != null) {
-            repository.reportsQuery(userId).removeEventListener(l)
+        if (l != null) {
+            repository.reportsQuery().removeEventListener(l)
+            listener = null
         }
     }
 
-    fun addReport(type: String, description: String, severity: Int, latitude: Double?, longitude: Double?) {
-        val userId = repository.currentUserId() ?: return
-        repository.insertReport(
-            userId = userId,
-            type = type,
-            description = description,
-            severity = severity,
-            latitude = latitude,
-            longitude = longitude
-        )
+    override fun onCleared() {
+        super.onCleared()
+        stopObserving()
     }
-    fun getLatestReport(): Report? = _reports.value.maxByOrNull { it.timestamp }
+
+    fun addReport(type: String, description: String, severity: Int, latitude: Double?, longitude: Double?, imageUri: Uri? = null) {
+        val userId = repository.currentUserId() ?: return
+        if (imageUri != null) {
+            repository.uploadImage(userId, imageUri) { downloadUrl ->
+                repository.insertReport(
+                    userId = userId,
+                    type = type,
+                    description = description,
+                    severity = severity,
+                    latitude = latitude,
+                    longitude = longitude,
+                    imageUrl = downloadUrl
+                )
+            }
+        } else {
+            repository.insertReport(
+                userId = userId,
+                type = type,
+                description = description,
+                severity = severity,
+                latitude = latitude,
+                longitude = longitude,
+                imageUrl = null
+            )
+        }
+    }
 
     fun deleteReport(key: String) {
-        val userId = repository.currentUserId() ?: return
-        repository.deleteReport(userId = userId, key = key)
+        repository.deleteReport(key = key)
     }
 }

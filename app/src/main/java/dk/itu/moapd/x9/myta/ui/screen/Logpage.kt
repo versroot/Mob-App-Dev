@@ -15,7 +15,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -30,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
@@ -37,7 +39,33 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dk.itu.moapd.x9.myta.R
 import dk.itu.moapd.x9.myta.ui.TAG
 import dk.itu.moapd.x9.myta.viewmodel.ReportViewModel
+import android.content.Context
+import android.net.Uri
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
+// import androidx.glance.appwidget.compose
+import java.io.File
 
+fun createImageUri(context: Context): Uri {
+    val directory = File(context.cacheDir, "my_images") // temp dir
+    directory.mkdirs()
+
+    val file = File.createTempFile(
+        "captured_image_",
+        ".jpg",
+        directory
+    )
+
+    val authority = "${context.packageName}.fileprovider"
+
+    return FileProvider.getUriForFile(
+        context,
+        authority,
+        file
+    )
+}
 @Composable
 fun Logpage(viewModel: ReportViewModel, innerPadding: PaddingValues) {
     TrafficReportForm(
@@ -59,6 +87,36 @@ fun TrafficReportForm(modifier: Modifier = Modifier, innerPadding: PaddingValues
     var description by rememberSaveable { mutableStateOf("") } // store what is in description; default - empty
     var severity by rememberSaveable { mutableFloatStateOf(3f) } // store severity; default middle (Slider uses Float) [web:111]
 
+    var imageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
+    var tempCameraUri by rememberSaveable { mutableStateOf<Uri?>(null) }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        imageUri = uri
+    }
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            imageUri = tempCameraUri
+        }
+        tempCameraUri = null
+    }
+    // A launcher to request the CAMERA permission
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            // Permission given! Now we can safely trigger the camera
+            val uri = createImageUri(context)
+            tempCameraUri = uri
+            cameraLauncher.launch(uri)
+        } else {
+            // User said no. Show a message explaining why we need it
+            Toast.makeText(context, "Camera permission is required to take photos", Toast.LENGTH_SHORT).show()
+        }
+    }
     // column  layout (left to right)
     Column(
 
@@ -95,7 +153,7 @@ fun TrafficReportForm(modifier: Modifier = Modifier, innerPadding: PaddingValues
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .menuAnchor(type = MenuAnchorType.PrimaryNotEditable)
+                    .menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable)
 
             )
 
@@ -143,7 +201,66 @@ fun TrafficReportForm(modifier: Modifier = Modifier, innerPadding: PaddingValues
             modifier = Modifier.fillMaxWidth()
         )
 
-        Button(onClick = {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // gallery
+            Button(
+                onClick = {
+                    galleryLauncher.launch(
+                        androidx.activity.result.PickVisualMediaRequest(
+                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                        )
+                    )
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Gallery")
+            }
+
+            // camera
+            // Updated Camera button
+            Button(
+                onClick = {
+                    val hasPermission = androidx.core.content.ContextCompat.checkSelfPermission(
+                        context,
+                        android.Manifest.permission.CAMERA
+                    ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+                    if (hasPermission) {
+                        // Already have permission? Go straight to camera
+                        val uri = createImageUri(context)
+                        tempCameraUri = uri
+                        cameraLauncher.launch(uri)
+                    } else {
+                        // No permission? Ask for it!
+                        permissionLauncher.launch(android.Manifest.permission.CAMERA)
+                    }
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Camera")
+            }
+        }
+
+
+        imageUri?.let {
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .padding(vertical = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                coil.compose.AsyncImage(
+                    model = it,
+                    contentDescription = "Selected Image",
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+        Button(onClick = { // submit button
             if (description.isBlank()) { // handle blank
                 Log.w(TAG, "Blocked submit: empty description")
                 Toast.makeText(
@@ -155,18 +272,20 @@ fun TrafficReportForm(modifier: Modifier = Modifier, innerPadding: PaddingValues
             }
             Log.d( // log logic
                 TAG,
-                "Report submitted: type=$selectedType, description=$description, severity=${severity.toInt()}"
+                "Report submitted: type=$selectedType, description=$description, severity=${severity.toInt()}"  //!TODO move to strings
             )
             viewModel.addReport(    //save to viewmodel
                 type = selectedType,
                 description = description,
                 severity = severity.toInt(),
                 latitude = currentLocation.latitude,
-                longitude = currentLocation.longitude
+                longitude = currentLocation.longitude,
+                imageUri = imageUri
             )
             description = ""    // Clear form
             severity = 3f
             selectedType = reportTypes[0]
+            imageUri = null
 
             Toast.makeText(
                 context,

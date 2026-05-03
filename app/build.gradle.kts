@@ -77,6 +77,7 @@ dependencies {
     implementation(libs.firebase.ui.database)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.ui.auth)
+    implementation(libs.firebase.storage)
     implementation(libs.play.services.location)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
@@ -84,4 +85,5 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation("com.google.android.gms:play-services-maps:20.0.0")
     implementation("com.google.maps.android:maps-compose:8.3.0")
+    implementation("io.coil-kt:coil-compose:2.6.0")
 }

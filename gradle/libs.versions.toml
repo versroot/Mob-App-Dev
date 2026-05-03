@@ -48,6 +48,8 @@ firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-database = { module = "com.google.firebase:firebase-database" }
 firebase-ui-auth = { module = "com.firebaseui:firebase-ui-auth", version.ref = "firebase-ui" }
 firebase-ui-database = { module = "com.firebaseui:firebase-ui-database", version.ref = "firebase-ui" }
+firebase-storage = { module = "com.google.firebase:firebase-storage" }
+
 
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }

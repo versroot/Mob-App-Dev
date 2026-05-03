@@ -40,6 +40,8 @@ import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.unit.dp
 import dk.itu.moapd.x9.myta.R
 import dk.itu.moapd.x9.myta.viewmodel.Report
 import dk.itu.moapd.x9.myta.viewmodel.ReportViewModel
@@ -159,6 +161,17 @@ fun ReportItem(
                     } else {
                         stringResource(R.string.loc_available)
                     }
+                )
+            }
+            if (report.imageUrl != null) {
+                coil.compose.AsyncImage(
+                    model = report.imageUrl,
+                    contentDescription = "Report Image",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .padding(start = dimensionResource(R.dimen.spacing_small))
+                        .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.small),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
                 )
             }
         }
