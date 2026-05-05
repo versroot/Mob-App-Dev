@@ -2,8 +2,11 @@ package dk.itu.moapd.x9.myta.ui.screen
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.material3.AlertDialog
+import androidx.compose.ui.window.Dialog
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.TextButton
 import androidx.compose.foundation.layout.Arrangement
@@ -98,6 +101,7 @@ fun ReportItem(
     modifier: Modifier = Modifier
 ) {
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
+    var showFullImage by rememberSaveable { mutableStateOf(false) }
 
     if (showDeleteDialog) {
         AlertDialog(
@@ -170,8 +174,29 @@ fun ReportItem(
                     modifier = Modifier
                         .size(80.dp)
                         .padding(start = dimensionResource(R.dimen.spacing_small))
-                        .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.small),
+                        .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.small)
+                        .clickable { showFullImage = true },
                     contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                )
+            }
+        }
+    }
+
+    if (showFullImage && report.imageUrl != null) {
+        Dialog(onDismissRequest = { showFullImage = false }) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .background(Color.Black, MaterialTheme.shapes.large)
+                    .clickable { showFullImage = false },
+                contentAlignment = Alignment.Center
+            ) {
+                coil.compose.AsyncImage(
+                    model = report.imageUrl,
+                    contentDescription = "Enlarged Image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Fit
                 )
             }
         }
