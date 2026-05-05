@@ -5,6 +5,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.hardware.Sensor
+import android.hardware.SensorManager
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
@@ -33,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.google.firebase.auth.FirebaseAuth
@@ -45,12 +48,18 @@ import dk.itu.moapd.x9.myta.ui.screen.Logpage
 import dk.itu.moapd.x9.myta.ui.screen.Mappage
 import dk.itu.moapd.x9.myta.ui.screen.requestOrStartTracking
 import dk.itu.moapd.x9.myta.viewmodel.ReportViewModel
+import dk.itu.moapd.x9.myta.util.ShakeDetector
 
 const val TAG = "X9"
-
 class MainActivity : ComponentActivity() {
 
     private lateinit var auth: FirebaseAuth
+
+    private lateinit var sensorManager: SensorManager
+    private lateinit var shakeDetector: ShakeDetector
+    private var accelerometer: Sensor? = null
+
+    private var navigateToLogRequested by mutableStateOf(false)
 
     override fun onStart() {
         super.onStart()
@@ -71,10 +80,17 @@ class MainActivity : ComponentActivity() {
 
         auth = FirebaseAuth.getInstance()
 
+        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+
+        shakeDetector = ShakeDetector {
+            navigateToLogRequested = true
+        }
+
         setContent {
             val viewModel: ReportViewModel = viewModel()
-            
-            LaunchedEffect(auth.currentUser) {
+
+            androidx.compose.runtime.LaunchedEffect(auth.currentUser) {
                 if (auth.currentUser != null) {
                     viewModel.observeReports()
                 }
@@ -82,15 +98,35 @@ class MainActivity : ComponentActivity() {
 
             X9mytaTheme {
                 BottomNavigationBar(
-                    viewModel = viewModel, 
+                    viewModel = viewModel,
                     auth = auth,
                     onLogout = {
                         auth.signOut()
-                        startLoginActivity() 
+                        startLoginActivity()
+                    },
+                    navigateToLogRequested = navigateToLogRequested,
+                    onLogNavigationHandled = {
+                        navigateToLogRequested = false
                     }
                 )
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        accelerometer?.let {
+            sensorManager.registerListener(
+                shakeDetector,
+                it,
+                SensorManager.SENSOR_DELAY_UI
+            )
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(shakeDetector)
     }
 }
 
@@ -130,8 +166,21 @@ fun NavigationBarHost(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomNavigationBar(viewModel: ReportViewModel, auth: FirebaseAuth, onLogout: () -> Unit) {
+fun BottomNavigationBar(viewModel: ReportViewModel, auth: FirebaseAuth, onLogout: () -> Unit,
+                        navigateToLogRequested: Boolean,
+                        onLogNavigationHandled: () -> Unit) {
     val navController = rememberNavController()
+
+    LaunchedEffect(navigateToLogRequested) {
+        if (navigateToLogRequested) {
+            navController.navigate(Destination.Log.route) {
+                popUpTo(navController.graph.startDestinationId)
+                launchSingleTop = true
+            }
+            onLogNavigationHandled()
+        }
+    }
+
     val destinations = listOf(Destination.Home, Destination.Map, Destination.Log)
     var menuExpanded by remember { mutableStateOf(false) }
     var showProfileDialog by rememberSaveable { mutableStateOf(false) }
