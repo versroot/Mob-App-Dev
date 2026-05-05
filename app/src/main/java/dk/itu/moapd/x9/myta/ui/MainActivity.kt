@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.google.firebase.auth.FirebaseAuth
@@ -89,12 +88,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val viewModel: ReportViewModel = viewModel()
-
-            androidx.compose.runtime.LaunchedEffect(auth.currentUser) {
-                if (auth.currentUser != null) {
-                    viewModel.observeReports()
-                }
-            }
 
             X9mytaTheme {
                 BottomNavigationBar(
@@ -159,7 +152,7 @@ fun NavigationBarHost(
             Logpage(viewModel = viewModel, innerPadding = innerPadding)
         }
         composable(Destination.Map.route) {
-            Mappage(viewModel = viewModel)
+            Mappage(viewModel = viewModel, innerPadding = innerPadding)
         }
     }
 }
@@ -224,8 +217,22 @@ fun BottomNavigationBar(viewModel: ReportViewModel, auth: FirebaseAuth, onLogout
         }
     }
 
-    val locationUpdates by locationService?.locationUpdates?.collectAsStateWithLifecycle(null) ?: remember { mutableStateOf(null) }
-    val isTracking by locationService?.isTracking?.collectAsStateWithLifecycle(false) ?: remember { mutableStateOf(false) }
+    // Fix: Avoid conditional Composable calls to collectAsStateWithLifecycle
+    val locationUpdatesFlow = remember(locationService) {
+        locationService?.locationUpdates ?: kotlinx.coroutines.flow.MutableStateFlow(null)
+    }
+    val locationUpdates by locationUpdatesFlow.collectAsStateWithLifecycle(null)
+
+    val isTrackingFlow = remember(locationService) {
+        locationService?.isTracking ?: kotlinx.coroutines.flow.MutableStateFlow(false)
+    }
+    val isTracking by isTrackingFlow.collectAsStateWithLifecycle(false)
+
+    LaunchedEffect(reports, locationService, isBound) {
+        if (isBound) {
+            locationService?.updateGeofences(reports)
+        }
+    }
 
     LaunchedEffect(locationUpdates) {
         locationUpdates?.let {

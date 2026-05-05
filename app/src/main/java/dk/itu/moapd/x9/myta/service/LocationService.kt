@@ -9,6 +9,7 @@ import android.os.Binder
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -16,6 +17,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import dk.itu.moapd.x9.myta.viewmodel.Report
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +34,9 @@ class LocationService : Service() {
     private val _isTracking = MutableStateFlow(false)
     val isTracking: StateFlow<Boolean> = _isTracking.asStateFlow()
 
+    private var reports: List<Report> = emptyList()
+    private val alertedReports = mutableSetOf<String>()
+
     inner class LocalBinder : Binder() {
         fun getService(): LocationService = this@LocationService
     }
@@ -43,7 +48,42 @@ class LocationService : Service() {
 
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
-                _locationUpdates.value = locationResult.lastLocation
+                val location = locationResult.lastLocation ?: return
+                _locationUpdates.value = location
+                checkDistances(location)
+            }
+        }
+    }
+
+    private fun checkDistances(currentLocation: Location) {
+        reports.forEach { report ->
+            val lat = report.latitude ?: return@forEach
+            val lon = report.longitude ?: return@forEach
+
+            val reportLocation = Location("").apply {
+                latitude = lat
+                longitude = lon
+            }
+
+            val distance = currentLocation.distanceTo(reportLocation)
+            
+            // Trigger alert when within 200 meters
+            if (distance < 200) {
+                if (!alertedReports.contains(report.key)) {
+                    Toast.makeText(
+                        applicationContext,
+                        "Approaching ${report.type}!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    alertedReports.add(report.key)
+                    Log.d("LocationService", "Alert triggered for ${report.key} at distance $distance")
+                }
+            } else if (distance > 300) {
+                // Reset alert if user moves more than 300 meters away
+                if (alertedReports.contains(report.key)) {
+                    alertedReports.remove(report.key)
+                    Log.d("LocationService", "Alert reset for ${report.key}")
+                }
             }
         }
     }
@@ -93,7 +133,13 @@ class LocationService : Service() {
         } finally {
             _isTracking.value = false
             _locationUpdates.value = null
+            alertedReports.clear()
         }
+    }
+
+    fun updateGeofences(newReports: List<Report>) {
+        this.reports = newReports
+        Log.d("LocationService", "Manual geofences updated with ${reports.size} reports")
     }
 
     override fun onDestroy() {

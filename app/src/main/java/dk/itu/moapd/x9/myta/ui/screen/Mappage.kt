@@ -12,6 +12,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import dk.itu.moapd.x9.myta.viewmodel.ReportViewModel
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,17 +22,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.CameraPosition
 import dk.itu.moapd.x9.myta.R
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.MarkerInfoWindowContent
 import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.maps.android.compose.rememberMarkerState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 
 @Composable
 fun Mappage(
-    viewModel: ReportViewModel
+    viewModel: ReportViewModel,
+    innerPadding: PaddingValues
 ) {
     val currentLocation by viewModel.currentLocation.collectAsStateWithLifecycle()
     val reports by viewModel.reports.collectAsStateWithLifecycle()
@@ -45,6 +45,7 @@ fun Mappage(
     if (userLatLng == null) {
         Column(
             modifier = Modifier.fillMaxSize()
+                .padding(innerPadding)
                 .padding(all = 24.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -58,7 +59,7 @@ fun Mappage(
     }
 
     val cameraPositionState = rememberCameraPositionState()
-    val markerState = rememberMarkerState(position = userLatLng)
+    val markerState = rememberUpdatedMarkerState(position = userLatLng)
 
     var hasCenteredOnUser by rememberSaveable { mutableStateOf(false) }
 
@@ -74,10 +75,17 @@ fun Mappage(
     }
 
     GoogleMap(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding),
         cameraPositionState = cameraPositionState,
         properties = MapProperties(
             mapType = MapType.NORMAL
+        ),
+        uiSettings = MapUiSettings(
+            zoomControlsEnabled = true,
+            compassEnabled = true,
+            myLocationButtonEnabled = true
         )
     ) {
         Marker(
