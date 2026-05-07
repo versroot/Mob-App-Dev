@@ -23,7 +23,6 @@ class ReportRepository(
     
     fun currentUserId(): String? = auth.currentUser?.uid
 
-
     fun reportsQuery(): Query = root
         .child(PATH_REPORTS)
         .orderByChild(CHILD_TIMESTAMP)
@@ -47,6 +46,7 @@ class ReportRepository(
     ) {
         val key = root
             .child(PATH_REPORTS)
+            .child(userId)
             .push()
             .key ?: return
             
@@ -63,6 +63,7 @@ class ReportRepository(
         
         root
             .child(PATH_REPORTS)
+            .child(userId)
             .child(key)
             .setValue(report)
     }
@@ -85,9 +86,10 @@ class ReportRepository(
             }
     }
     
-    fun deleteReport(key: String) {
+    fun deleteReport(userId: String, key: String){
         root
             .child(PATH_REPORTS)
+            .child(userId)
             .child(key)
             .removeValue()
     }

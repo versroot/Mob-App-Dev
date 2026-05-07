@@ -45,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.unit.dp
+import com.google.firebase.auth.FirebaseAuth
 import dk.itu.moapd.x9.myta.R
 import dk.itu.moapd.x9.myta.viewmodel.Report
 import dk.itu.moapd.x9.myta.viewmodel.ReportViewModel
@@ -103,6 +104,9 @@ fun ReportItem(
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
     var showFullImage by rememberSaveable { mutableStateOf(false) }
 
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+    val isOwnReport = report.uid == currentUserId
+
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = {
@@ -132,7 +136,8 @@ fun ReportItem(
             .fillMaxWidth()
             .padding(vertical = dimensionResource(R.dimen.spacing_small))
             .combinedClickable(
-                onClick = { /**/ },
+                enabled = isOwnReport,
+                onClick = { },
                 onLongClick = {
                     showDeleteDialog = true
                 }

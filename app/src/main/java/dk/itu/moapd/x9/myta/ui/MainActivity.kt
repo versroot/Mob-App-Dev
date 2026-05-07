@@ -307,6 +307,8 @@ fun BottomNavigationBar(viewModel: ReportViewModel, auth: FirebaseAuth, onLogout
 
     if (showProfileDialog) {
         val userName = auth.currentUser?.displayName ?: auth.currentUser?.email ?: "User"
+        val currentUserId = auth.currentUser?.uid
+        val reportCount = reports.count { it.uid == currentUserId }
         AlertDialog(
             onDismissRequest = { showProfileDialog = false },
             confirmButton = { TextButton(onClick = { showProfileDialog = false }) { Text("OK") } },
@@ -317,7 +319,7 @@ fun BottomNavigationBar(viewModel: ReportViewModel, auth: FirebaseAuth, onLogout
                         Icon(Icons.Filled.AccountCircle, contentDescription = null, modifier = Modifier.fillMaxSize())
                     }
                     Text(text = userName, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                    Text(text = "Total Reports: ${reports.size}", fontSize = 16.sp)
+                    Text(text = "My Reports: $reportCount", fontSize = 16.sp)
                 }
             }
         )

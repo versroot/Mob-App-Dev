@@ -57,7 +57,6 @@ class ReportViewModel(
     }
 
     fun observeReports() {
-
         stopObserving()
 
         val query = repository.reportsQuery()
@@ -76,7 +75,7 @@ class ReportViewModel(
                 Log.e("ReportViewModel", "Database error: ${error.message}")
             }
         }
-        
+
         listener = valueListener
         query.addValueEventListener(valueListener)
     }
@@ -122,6 +121,7 @@ class ReportViewModel(
     }
 
     fun deleteReport(key: String) {
-        repository.deleteReport(key = key)
+        val userId = repository.currentUserId() ?: return
+        repository.deleteReport(userId = userId, key = key)
     }
 }
