@@ -12,23 +12,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlin.String
-
-data class Report(
-    val key: String = "",
-    val uid: String = "",
-    val type: String = "",
-    val latitude: Double? = null,
-    val longitude: Double? = null,
-    val description: String = "",
-    val severity: Int = 1,
-    val timestamp: Long = 0L,
-    val imageUrl: String? = null
-)
-
-data class UiLocation(
-    val latitude: Double? = null,
-    val longitude: Double? = null
-)
+import dk.itu.moapd.x9.myta.viewmodel.model.Report
+import dk.itu.moapd.x9.myta.viewmodel.model.UiLocation
 
 class ReportViewModel(
     private val repository: ReportRepository = ReportRepository()

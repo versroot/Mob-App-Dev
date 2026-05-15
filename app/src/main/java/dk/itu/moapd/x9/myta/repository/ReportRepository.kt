@@ -8,9 +8,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Query
 import com.google.firebase.storage.FirebaseStorage
 import dk.itu.moapd.x9.myta.BuildConfig
-import dk.itu.moapd.x9.myta.viewmodel.Report
-
-
+import dk.itu.moapd.x9.myta.viewmodel.model.Report
 class ReportRepository(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
     private val root: DatabaseReference = FirebaseDatabase.getInstance(BuildConfig.FIREBASE_DATABASE_URL).reference,
@@ -28,12 +26,6 @@ class ReportRepository(
         .orderByChild(CHILD_TIMESTAMP)
 
 
-    fun userReportsQuery(userId: String): Query = root
-        .child(PATH_REPORTS)
-        .orderByChild("uid")
-        .equalTo(userId)
-
-
     fun insertReport(
         userId: String,
         type: String,
@@ -46,7 +38,6 @@ class ReportRepository(
     ) {
         val key = root
             .child(PATH_REPORTS)
-            .child(userId)
             .push()
             .key ?: return
             
@@ -63,7 +54,6 @@ class ReportRepository(
         
         root
             .child(PATH_REPORTS)
-            .child(userId)
             .child(key)
             .setValue(report)
     }
@@ -89,7 +79,6 @@ class ReportRepository(
     fun deleteReport(userId: String, key: String){
         root
             .child(PATH_REPORTS)
-            .child(userId)
             .child(key)
             .removeValue()
     }

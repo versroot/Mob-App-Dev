@@ -45,7 +45,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
-// import androidx.glance.appwidget.compose
 import java.io.File
 
 fun createImageUri(context: Context): Uri {

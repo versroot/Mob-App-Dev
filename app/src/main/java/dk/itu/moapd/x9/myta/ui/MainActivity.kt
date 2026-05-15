@@ -9,7 +9,6 @@ import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -355,12 +354,5 @@ fun BottomNavigationBar(viewModel: ReportViewModel, auth: FirebaseAuth, onLogout
             },
             dismissButton = { TextButton(onClick = { showLocationDialog = false }) { Text(stringResource(R.string.dialog_ok)) } }
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TrafficReportFormPreview() {
-    X9mytaTheme {
     }
 }
